@@ -187,90 +187,90 @@ app.get('/getLandmarkData', async (req, res) => {
 
 app.get('/getLandmarkFilterData', async (req, res) => {
     const landmarkID = req.query.landmarkID;
-    let landmarkQuery=''
-    console.log('getLandmarkFilterData')
-    console.log(landmarkID)
+    let landmarkQuery = '';
+    console.log('getLandmarkFilterData');
+    console.log(landmarkID);
     try {
-        if(landmarkID!='' && landmarkID!=null && landmarkID!=''){
-         landmarkQuery = `
-            SELECT 
-                a.id AS landmarkId,
-                a.name AS landmarkName,
-                a.location AS addedFrom,
-                a.image AS images,
-                b.id AS commentId,
-                b.comment,
-                c.full_name AS addedBy,
-                d.full_name AS commenter
-            FROM 
-                tbl_landmark AS a
-                LEFT JOIN tbl_comments AS b ON a.id = b.landmark_id
-                LEFT JOIN tbl_user AS c ON a.added_by = c.id
-                LEFT JOIN tbl_user AS d ON b.added_by = d.id
-                where a.name  LIKE '%${landmarkID}%' 
-            ORDER BY 
-                a.id, b.id;
-        `;
+        if (landmarkID != '' && landmarkID != null && landmarkID != '') {
+            landmarkQuery = `
+                SELECT 
+                    a.id AS landmarkId,
+                    a.name AS landmarkName,
+                    a.location AS addedFrom,
+                    a.image AS images,
+                    b.id AS commentId,
+                    b.comment,
+                    c.full_name AS addedBy,
+                    d.full_name AS commenter
+                FROM 
+                    tbl_landmark AS a
+                    LEFT JOIN tbl_comments AS b ON a.id = b.landmark_id
+                    LEFT JOIN tbl_user AS c ON a.added_by = c.id
+                    LEFT JOIN tbl_user AS d ON b.added_by = d.id
+                WHERE 
+                    a.name LIKE '%${landmarkID}%' 
+                ORDER BY 
+                    a.id, b.id;
+            `;
+        } else {
+            landmarkQuery = `
+                SELECT 
+                    a.id AS landmarkId,
+                    a.name AS landmarkName,
+                    a.location AS addedFrom,
+                    a.image AS images,
+                    b.id AS commentId,
+                    b.comment,
+                    c.full_name AS addedBy,
+                    d.full_name AS commenter
+                FROM 
+                    tbl_landmark AS a
+                    LEFT JOIN tbl_comments AS b ON a.id = b.landmark_id
+                    LEFT JOIN tbl_user AS c ON a.added_by = c.id
+                    LEFT JOIN tbl_user AS d ON b.added_by = d.id
+                ORDER BY 
+                    a.id, b.id;
+            `;
         }
-        else {
-             landmarkQuery = `
-            SELECT 
-                a.id AS landmarkId,
-                a.name AS landmarkName,
-                a.location AS addedFrom,
-                a.image AS images,
-                b.id AS commentId,
-                b.comment,
-                c.full_name AS addedBy,
-                d.full_name AS commenter
-            FROM 
-                tbl_landmark AS a
-                LEFT JOIN tbl_comments AS b ON a.id = b.landmark_id
-                LEFT JOIN tbl_user AS c ON a.added_by = c.id
-                LEFT JOIN tbl_user AS d ON b.added_by = d.id
-            ORDER BY 
-                a.id, b.id;
-        `;
-        }
-        console.log(landmarkQuery)
+        console.log(landmarkQuery);
         const landmarkData = await query(landmarkQuery);
 
         if (landmarkData.length === 0) {
             return res.status(404).json({ ok: false, message: 'No Landmark data Found' });
         }
 
-
         // Group comments by landmark ID
         const groupedData = landmarkData.reduce((acc, item) => {
             const { landmarkId, landmarkName, addedFrom, images, addedBy } = item;
             if (!acc[landmarkId]) {
-                acc[landmarkId] = { 
-                    landmarkId, 
-                    landmarkName, 
-                    addedFrom, 
-                    images, 
-                    addedBy, 
-                    comments: [] 
+                acc[landmarkId] = {
+                    landmarkId,
+                    landmarkName,
+                    addedFrom,
+                    images, // Embedding the image path
+                    addedBy,
+                    comments: [],
                 };
             }
             if (item.commentId) {
                 acc[landmarkId].comments.push({
                     commentId: item.commentId,
                     comment: item.comment,
-                    commenter: item.commenter
+                    commenter: item.commenter,
                 });
             }
             return acc;
         }, {});
 
         const result = Object.values(groupedData);
-        console.log(result)
+        console.log(result);
         res.status(200).json({ ok: true, landmarkData: result });
     } catch (error) {
         console.error('Error fetching Landmark data:', error);
         res.status(500).json({ ok: false, message: 'Internal Server Error' });
     }
 });
+
 app.get('/getLandMarkNames', async (req, res) => {
     try {
         // Query to fetch distinct landmark names

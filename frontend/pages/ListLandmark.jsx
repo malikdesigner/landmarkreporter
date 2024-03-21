@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, Button, StyleSheet, Modal, TextInput, FlatList, ScrollView, Platform, SafeAreaView } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { View, Text, TouchableOpacity, Image, Button, StyleSheet, Modal, TextInput, FlatList, ScrollView, Platform, SafeAreaView, useWindowDimensions } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons'; // Import Ionicons from Expo for the 3-dot icon
-import Icon from 'react-native-vector-icons/FontAwesome';
-import * as Location from 'expo-location';
+
 import apiUrl from './apiUrl';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
+
 
 let ToastAndroid;
 if (Platform.OS === 'android') {
@@ -15,7 +14,7 @@ if (Platform.OS === 'android') {
 let api_key = "65f1799bd9e19304693331bxo16e469";
 const ListLandmark = ({ usersData }) => {
     const [landmarkData, setLandmarkData] = useState([]);
-
+    const imageTest = '../assets/images/1710954785707.jpg';
     const [popupVisible, setPopupVisible] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedlandmarkId, setSelectedLandmarkId] = useState(null);
@@ -24,12 +23,12 @@ const ListLandmark = ({ usersData }) => {
     const [landmarkName, setLandmarkName] = useState([]);
     const [selectedLandmark, setSelectedLandmark] = useState('');
 
-
+    const { width } = useWindowDimensions();
     useEffect(() => {
         // fetchLandmarkData();
         fetchLandmarkName();
         fetchLandMarkFilterData(selectedLandmark); // Fetch filtered landmark data based on selected landmark
-        
+
     }, [selectedLandmark]);
     const user = usersData.id;
 
@@ -84,7 +83,8 @@ const ListLandmark = ({ usersData }) => {
                 } else {
                     alert('Comment deleted successfully');
                 }
-                fetchLandmarkData();
+                fetchLandMarkFilterData(filtererdLandmark)
+                fetchLandmarkName()
             } else {
                 // Show an error toast
                 if (ToastAndroid) {
@@ -129,7 +129,8 @@ const ListLandmark = ({ usersData }) => {
                 } else {
                     alert('Comment added successfully');
                 }
-                setNewComment('');
+                fetchLandMarkFilterData(filtererdLandmark)
+                fetchLandmarkName()
             } else {
                 // Show an error toast
                 if (ToastAndroid) {
@@ -152,17 +153,25 @@ const ListLandmark = ({ usersData }) => {
 
         setModalVisible(false); // Close the modal after adding comment
     };
-    const fetchLandMarkFilterData=async(landmarkID)=>{
+    function requireAll(context) {
+        return context.keys().map(context);
+    }
+    const handleRefresh = () => {
+        // Trigger refresh by updating selectedLandmark state
+        setSelectedLandmark('');
+        fetchLandMarkFilterData(selectedLandmark);
+    };
+    const fetchLandMarkFilterData = async (landmarkID) => {
         let response;
         try {
-            
-            if(landmarkID){
-                
-                 response = await axios.get(`${apiUrl}/getLandmarkFilterData?landmarkID=${landmarkID}`);
+
+            if (landmarkID) {
+
+                response = await axios.get(`${apiUrl}/getLandmarkFilterData?landmarkID=${landmarkID}`);
             }
             else {
-                
-                 response = await axios.get(`${apiUrl}/getLandmarkFilterData`);
+
+                response = await axios.get(`${apiUrl}/getLandmarkFilterData`);
             }
 
             if (response.data.ok) {
@@ -175,105 +184,146 @@ const ListLandmark = ({ usersData }) => {
             console.error('Error fetching landmark data:', error);
         }
     }
-    const renderItem = ({ item }) => (
-        <>
-    
-        {Platform.OS !== 'android' || Platform.OS !== 'ios' ? (
-        <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: 'black', paddingBottom: 10 }}>
-        {/* Landmark Gallery */}
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                {/* Parse the JSON string to an array */}
-                {item.images && JSON.parse(item.images).map((image, index) => (
-                    <Image
-                        key={index}
-                        source={{ uri: `../assets/images/${image}` }}
-                        style={{ width: 200, height: 200, marginRight: 10 }}
-                    />
-                ))}
-            </ScrollView>
-            {/* Landmark Name */}
-            <Text style={{ fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>{item.landmarkName}</Text>
-            {/* Added From */}
-            <Text>Added From: {item.addedFrom}</Text>
-            {/* Comments */}
-            {item.comments && item.comments.map((comment, index) => (
-                <View key={index} style={{ marginTop: 10 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', marginRight: 10 }}>{comment.commenter}</Text>
-                        <Text style={{ flex: 1 }}>{comment.comment}</Text>
-                        <Text style={{ flex: 1 }}>{comment.commentId}</Text>
-                            <Ionicons.Button  onPress={() => deleteComment(comment.commentId)} name="trash" size={16} />
-                    </View>
-                </View>
-            ))}
-            {/* Add Comment Button */}
-            <Button color='blue' style={{marginBottom:5}} title="Add Comment" onPress={() => { setSelectedLandmarkId(item.landmarkId); setModalVisible(true); }} />
-        </View>
-           ) : (
-            <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: 'black', paddingBottom: 10 }}>
-            {/* Landmark Gallery */}
-            <FlatList
-                horizontal
-                data={JSON.parse(item.images)}
-                keyExtractor={(image, index) => index.toString()}
-                renderItem={({ item: image }) => (
-                    <Image
-                        source={{ uri: `../assets/images/${image}` }} // Check this URI
-                        style={{ width: 200, height: 200, marginRight: 10 }}
-                    />
-                )}
-                showsHorizontalScrollIndicator={false}
-            />
-            {/* Landmark Name */}
-            <Text style={{ fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>{item.landmarkName}</Text>
-            {/* Added From */}
-            <Text>Added From: {item.addedFrom}</Text>
-            {/* Comments */}
-            {item.comments && item.comments.map((comment, index) => (
-                <View key={index} style={{ marginTop: 10 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', marginRight: 10 }}>{comment.commenter}</Text>
-                        <Text style={{ flex: 1 }}>{comment.comment}</Text>
-                        <Text style={{ flex: 1 }}>{comment.commentId}</Text>
-                        <Ionicons.Button onPress={() => deleteComment(comment.commentId)} name="trash" size={16} />
-                    </View>
-                </View>
-            ))}
-            {/* Add Comment Button */}
-            <Button color='blue' style={{ marginBottom: 5 }} title="Add Comment" onPress={() => { setSelectedLandmarkId(item.landmarkId); setModalVisible(true); }} />
-        </View>
-        )}
-    </>
-);
+    const renderItem = ({ item }) => {
+        if (Platform.OS !== 'android' && Platform.OS !== 'ios') {
+            return (
+                <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: 'black', paddingBottom: 10 }}>
+                    <View  style={{alignItems:'center'}}>
 
-    
+                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                        {item.images && JSON.parse(item.images).map((image, index) => (
+                            <Image
+                                key={index}
+                                source={{ uri: `../assets/images/${image}` }}
+                                style={{ width: 200, height: 200, marginRight: 10 }}
+                            />
+                        ))}
+                    </ScrollView>
+                    <Text style={{ fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>{item.landmarkName}</Text>
+                    <Text>Added By: {item.addedBy}</Text>
+
+                    <Text>Added From: {item.addedFrom}</Text>
+                    </View>
+                    {item.comments && item.comments.map((comment, index) => (
+                        <View key={index} style={{ marginTop: 10 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={{ fontWeight: 'bold', marginRight: 10 }}>{comment.commenter}</Text>
+                                <Text style={{ flex: 1 }}>{comment.comment}</Text>
+                                <Ionicons.Button onPress={() => deleteComment(comment.commentId)} name="trash" size={16} />
+                            </View>
+                        </View>
+                    ))}
+                    <Button color='blue' style={{ marginBottom: 5 }} title="Add Comment" onPress={() => { setSelectedLandmarkId(item.landmarkId); setModalVisible(true); }} />
+                </View>
+            );
+        } else {
+            const imageFiles = JSON.parse(item.images);
+            const imageImports = requireAll(
+                require.context('../assets/images', true, /\.(png|jpg|jpeg)$/)
+            ).filter((_, i) => i < imageFiles.length);
+            return (
+                <View>
+                    <View style={[styles.itemContainer, { width }]}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 20, padding: 10 }}>{item.landmarkName}</Text>
+                        {item.images &&
+                            JSON.parse(item.images).map((image, index) => (
+                                <Image
+                                    key={index}
+                                    source={imageImports[index]}
+                                    style={[styles.image, { width, resizeMode: 'contain' }]}
+                                />
+                            ))}
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontWeight: 'bold' }}>Added By: {item.addedBy}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>Added From: {item.addedFrom}</Text>
+                        </View>
+                    </View>
+                    {item.comments && item.comments.map((comment, index) => (
+                        <View key={index} style={{ marginTop: 10, paddingLeft: 10, paddingRight: 10 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={{ fontWeight: 'bold', marginRight: 10 }}>{comment.commenter}</Text>
+                                <Text style={{ flex: 1 }}>{comment.comment}</Text>
+                                <Ionicons.Button onPress={() => deleteComment(comment.commentId)} name="trash" size={16} />
+                            </View>
+                        </View>
+                    ))}
+                    <View style={{ marginBottom: 5, width: '100%' }}>
+                        <Button color='blue' title="Add Comment" onPress={() => { setSelectedLandmarkId(item.landmarkId); setModalVisible(true); }} />
+                    </View>
+                </View>
+            );
+
+        }
+    };
+
+
 
 
 
     return (
         <View style={styles.mainContainer}>
-            <View style={{flex:1,flexDirection:'row',marginBottom:30,marginTop:10,padding:5}}>
 
 
-            <Text style={{fontWeight: 'bold',fontSize:14,padding:10}}>LANDMARKS </Text>
-            <Picker
-                        selectedValue={setFilteredLandmark}
-                        style={styles.dropdown}
-                        // onValueChange={(itemValue, itemIndex) => fetchLandMarkFilterData(itemValue)}
-                        onValueChange={(itemValue, itemIndex) => setSelectedLandmark(itemValue)}
-                    >
-                        <Picker.Item label="Select landmark you want to see" value="" />
-                        {landmarkName.map(landmark => (
-                            <Picker.Item key={landmark.name} label={landmark.name} value={landmark.name} />
-                        ))}
-                    </Picker>
+            <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', marginBottom: 30, marginTop: 10, padding: 5 }}>
+                {Platform.OS !== 'android' && Platform.OS !== 'ios' ? (
+                    <>
+                        <Text style={{ fontWeight: 'bold', fontSize: 30 }}>LANDMARKS </Text>
+                        <View style={{flexDirection:'row'}}>
+                        <Picker
+                            selectedValue={setFilteredLandmark}
+                            style={styles.dropdown}
+                            // onValueChange={(itemValue, itemIndex) => fetchLandMarkFilterData(itemValue)}
+                            onValueChange={(itemValue, itemIndex) => setSelectedLandmark(itemValue)}
+                        >
+                            <Picker.Item label="Select landmark you want to see" value="" />
+                            {landmarkName.map(landmark => (
+                                <Picker.Item key={landmark.name} label={landmark.name} value={landmark.name} />
+                            ))}
+                        </Picker>
+                        <Button color='blue' title="Refresh" onPress={() => { handleRefresh() }} />
+                        </View>
+
+                    </>
+                ) : (
+                    <>
+                        <Text style={{ fontWeight: 'bold', fontSize: 30, padding: 5 }}>LANDMARKS </Text>
+                        <View>
+                        <Picker
+                            selectedValue={setFilteredLandmark}
+                            style={styles.dropdown}
+                            // onValueChange={(itemValue, itemIndex) => fetchLandMarkFilterData(itemValue)}
+                            onValueChange={(itemValue, itemIndex) => setSelectedLandmark(itemValue)}
+                        >
+                            <Picker.Item label="Select landmark you want to see" value="" />
+                            {landmarkName.map(landmark => (
+                                <Picker.Item key={landmark.name} label={landmark.name} value={landmark.name} />
+                            ))}
+                        </Picker>
+                        <Button color='blue' title="Refresh" onPress={() => { handleRefresh() }} />
+                        </View>
+                    </>
+                )}
             </View>
-        <FlatList
+            {Platform.OS !== 'android' && Platform.OS !== 'ios' ? (
+                <FlatList
                 data={filtererdLandmark}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.landmarkId.toString()}
-                style={{ padding: 10 }}
+                style={{ padding: 10,marginTop:40 }}
+/>
+                ):(
+                <FlatList
+                    data={filtererdLandmark}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.landmarkId.toString()}
+                    style={{ padding: 10,paddingBottom:100 }}
+                    horizontal
+                    showsHorizontalScrollIndicator
+                    pagingEnabled
+                    bounces={false}
+                
             />
+            )}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -319,7 +369,18 @@ const styles = StyleSheet.create({
         right: 20,
         flexDirection: 'row'
     },
-    mainContainer :{
+    itemContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    image: {
+        flex: 0.7,
+        justifyContent: 'center',
+        height: 200,
+        marginBottom: 5
+    },
+    mainContainer: {
 
         ...Platform.select({
             ios: {
@@ -329,16 +390,17 @@ const styles = StyleSheet.create({
                 // maxHeight: 'calc(100vh - 250px)', // Adjust as needed
                 marginBottom: 10
             },
-            android:{
+            android: {
                 flex: 1,
                 paddingTop: 6,
                 // minHeight:'100vh',
                 // maxHeight: 'calc(100vh - 250px)', // Adjust as needed
                 marginBottom: 10
             },
-            web:{
+            web: {
                 paddingHorizontal: 16,
                 paddingTop: 6,
+                paddingBottom:10,
                 minHeight: '100vh',
                 maxHeight: 'calc(100vh - 250px)', // Adjust as needed
                 marginBottom: 10,
@@ -377,9 +439,9 @@ const styles = StyleSheet.create({
     },
     dropdown: {
         minWidth: 300, // Adjust the minimum width as needed
-        marginBottom: 10,
-        padding: 10,
-        marginLeft:'auto'
+        marginBottom: 5,
+        padding: 5,
+        //marginLeft: 'auto'
     },
     heading: {
         fontSize: 20,

@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, FlatList, ScrollView, Platform } from 'react-native';
-import { useRoute } from '@react-navigation/native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons'; // Import Ionicons from Expo for the 3-dot icon
-import Icon from 'react-native-vector-icons/FontAwesome';
-import * as Location from 'expo-location';
-import apiUrl from './apiUrl';
-import axios from 'axios';
+
 import ListLandmark from './ListLandmark';
 
 let ToastAndroid;
@@ -80,7 +76,7 @@ const LandmarkData = ({ navigation, route: routeProp }) => {
             <ListLandmark usersData={usersData} />
             <View style={styles.containerMain}>
                 {Platform.OS == 'android' && (
-                    <TouchableOpacity style={[styles.addButton, styles.androidButton]} onPress={addNewLandmark}>
+                    <TouchableOpacity style={styles.addButton} onPress={addNewLandmark}>
                         <FontAwesome5 name="plus" size={24} color="white" />
                     </TouchableOpacity>
                 )}
@@ -139,16 +135,12 @@ const styles = StyleSheet.create({
         borderRadius: 25, // Make it circular
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20, // Adjust as needed
-        marginRight: 20, // Adjust as needed
-        bottom: 40, // Adjust as needed
+        marginRight: 5, // Adjust as needed
+        bottom: 300, // Adjust as needed
         // right: 10, // Adjust as needed
         // left:60,
-        right: 1,
         zIndex: 9999, // Ensure it's displayed on top
-    },
-    androidButton: {
-        right: 1, // Adjust as needed
-    },
+    }
+  
 });
 export default LandmarkData;

@@ -276,7 +276,7 @@ const Register = ({ route: routeProp }) => {
             {step === 1 && (
                 <View style={styles.container}>
                     <View style={styles.startingScreen}>
-                    <Image source={require('../assets/download.jpeg')} style={styles.logo} />
+                    <Image source={require('../assets/download.png')} style={styles.logo} />
                         <Text style={styles.appName}>Join Us</Text>
                         <Text style={styles.tagline}>Add Your  Landmark</Text>
 

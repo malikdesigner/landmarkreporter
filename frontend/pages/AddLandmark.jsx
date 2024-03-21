@@ -6,9 +6,7 @@ import { CheckBox } from 'react-native-elements';
 import * as Location from 'expo-location';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
-// import RNFS from 'react-native-fs';
 import Ionicons from '@expo/vector-icons/Ionicons'
 import apiUrl from './apiUrl';
 const imgDir = FileSystem.documentDirectory + 'images/';
@@ -285,7 +283,7 @@ const AddLandmark = ({ navigation, route: routeProp }) => {
             {step === 1 && (
                 <View style={styles.container}>
                     <View style={styles.startingScreen}>
-                        <Image source={require('../assets/download.jpeg')} style={styles.logo} />
+                        <Image source={require('../assets/download.png')} style={styles.logo} />
                         <Text style={styles.appName}>Add Your  Landmark</Text>
 
                         <Text style={styles.tagline}>To Our  App!</Text>

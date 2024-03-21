@@ -58,7 +58,7 @@ const Login = ({ navigation }) => {
     return (
         <View style={styles.container}>
             {/* Image */}
-            <Image source={require('../assets/download.jpeg')} style={styles.logo} />
+            <Image source={require('../assets/download.png')} style={styles.logo} />
 
             {/* Input Fields */}
             <TextInput
