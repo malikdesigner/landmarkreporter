@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 20, 2024 at 10:22 PM
+-- Generation Time: Mar 21, 2024 at 07:57 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -42,7 +42,9 @@ CREATE TABLE `tbl_comments` (
 INSERT INTO `tbl_comments` (`id`, `comment`, `added_by`, `date_added`, `landmark_id`) VALUES
 (2, 'Nice place to visit', 11, '2024-03-20 19:07:12.893000', 1),
 (3, 'Beautifull place', 11, '2024-03-20 20:00:09.190000', 2),
-(4, 'Good place to visit', 11, '2024-03-20 20:00:38.957000', 1);
+(4, 'Good place to visit', 11, '2024-03-20 20:00:38.957000', 1),
+(6, 'Excellent place to visit', 11, '2024-03-21 17:49:03.975000', 3),
+(7, 'CHeck out this place', 11, '2024-03-21 18:30:09.785000', 3);
 
 -- --------------------------------------------------------
 
@@ -65,7 +67,8 @@ CREATE TABLE `tbl_landmark` (
 
 INSERT INTO `tbl_landmark` (`id`, `name`, `image`, `added_by`, `date_added`, `location`) VALUES
 (1, 'Tulum', '[\"1710954785707.jpg\",\"1710954809622.jpg\"]', 11, '2024-03-20 17:19:58.380000', 'Attock, Pakistan'),
-(2, 'Tulum', '[\"1710954785707.jpg\",\"1710954809622.jpg\"]', 11, '2024-03-20 17:19:58.380000', 'Attock, Pakistan');
+(2, 'Tulum', '[\"1710954785707.jpg\",\"1710954809622.jpg\"]', 11, '2024-03-20 17:19:58.380000', 'Attock, Pakistan'),
+(3, 'Chicken Itza', '[\"1711043194003.jpg\",\"1711043163661.jpg\"]', 11, '2024-03-21 17:46:44.120000', 'Attock, Pakistan');
 
 -- --------------------------------------------------------
 
@@ -127,13 +130,13 @@ ALTER TABLE `tbl_user`
 -- AUTO_INCREMENT for table `tbl_comments`
 --
 ALTER TABLE `tbl_comments`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `tbl_landmark`
 --
 ALTER TABLE `tbl_landmark`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `tbl_user`
